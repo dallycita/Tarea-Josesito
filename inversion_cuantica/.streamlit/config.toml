@@ -1,0 +1,41 @@
+# Diseño general de la app: tema oscuro elegante (negro, grafito y dorado).
+# Las animaciones, tarjetas y detalles finos están en estilo.css.
+
+[theme]
+base = "dark"
+primaryColor = "#C9A45C"              # dorado champán (controles y acentos)
+backgroundColor = "#0A0B0E"           # negro profundo (fondo de la página)
+secondaryBackgroundColor = "#16181E"  # grafito (cajas de texto, tablas)
+textColor = "#E8E6E1"                 # blanco cálido, más suave que el blanco puro
+linkColor = "#D9B872"
+borderColor = "#24272F"
+baseRadius = "0.9rem"
+baseFontSize = 16
+# Tipografías de Google Fonts (si no hay internet se usa una letra normal):
+#   Fraunces  → títulos (serif elegante, estilo revista financiera)
+#   Inter     → texto y números
+#   JetBrains Mono → siglas de las empresas (NVDA, AAPL…)
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+headingFont = "Fraunces:https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"
+codeFont = "JetBrains Mono:https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap"
+headingFontWeights = [500, 500, 500, 500, 600, 600]
+dataframeHeaderBackgroundColor = "#13151A"
+# Paleta de las gráficas (validada para daltonismo sobre fondo oscuro)
+chartCategoricalColors = ["#3F7FDB", "#C0567E", "#B8893A"]
+
+# Barra lateral: un tono aún más oscuro que la página
+[theme.sidebar]
+backgroundColor = "#07080A"
+secondaryBackgroundColor = "#121419"
+textColor = "#C9CCD3"
+primaryColor = "#C9A45C"
+borderColor = "#1A1D23"
+
+[server]
+headless = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"

@@ -1,0 +1,11 @@
+# Secretos
+.env
+
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Datos descargados y resultados (se generan solos)
+cache/

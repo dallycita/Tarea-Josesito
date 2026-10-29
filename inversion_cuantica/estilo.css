@@ -1,0 +1,654 @@
+/*
+  Diseño de la app (tema oscuro elegante). app.py lo carga con st.html("estilo.css").
+  Los colores base y las letras están en .streamlit/config.toml.
+
+  Paleta:
+    negro      #0A0B0E   fondo
+    grafito    #111318   tarjetas
+    borde      #23262E
+    dorado     #C9A45C   acento principal
+    texto      #E8E6E1   /  texto suave #8B909C
+*/
+
+/* ===================================================================
+   1. Animaciones (se usan más abajo)
+   =================================================================== */
+
+/* Aparecer subiendo un poco */
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Brillos de fondo de la portada que flotan lentamente */
+@keyframes flotar {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(40px, -25px) scale(1.15); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Cinta de cotizaciones que corre de derecha a izquierda */
+@keyframes desplazar {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* Punto "en vivo" que late */
+@keyframes latir {
+    0%   { box-shadow: 0 0 0 0 rgba(61, 214, 140, 0.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(61, 214, 140, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(61, 214, 140, 0); }
+}
+
+/* Destello que cruza los botones dorados */
+@keyframes destello {
+    from { left: -60%; }
+    to   { left: 130%; }
+}
+
+/* ===================================================================
+   2. Página general
+   =================================================================== */
+
+/* Fondo negro con dos brillos muy suaves (dorado arriba, azul a la izquierda) */
+.stApp {
+    background:
+        radial-gradient(900px 520px at 88% -8%, rgba(201, 164, 92, 0.09), transparent 60%),
+        radial-gradient(800px 500px at -5% 25%, rgba(63, 127, 219, 0.06), transparent 60%),
+        #0A0B0E;
+    background-attachment: fixed;
+}
+
+/* La barra superior de Streamlit, transparente */
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+.block-container {
+    max-width: 1200px;
+    padding-top: 3.5rem;
+    padding-bottom: 3rem;
+}
+
+/* Títulos: un poco más juntos */
+h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+}
+h1 {
+    font-size: 3rem !important;
+    line-height: 1.1 !important;
+}
+
+/* Números con todas las cifras del mismo ancho (se alinean mejor) */
+body {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Selección de texto dorada */
+::selection {
+    background: rgba(201, 164, 92, 0.35);
+}
+
+/* Barra de desplazamiento oscura y fina */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0A0B0E; }
+::-webkit-scrollbar-thumb { background: #262A33; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #3A3F4A; }
+
+/* ===================================================================
+   3. Tarjetas (todo st.container(border=True) con key "tarjeta...")
+   =================================================================== */
+[class*="st-key-tarjeta"] {
+    position: relative;
+    background: linear-gradient(180deg, #14161C 0%, #0F1115 100%);
+    border-color: #23262E !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 20px 40px -28px rgba(0, 0, 0, 0.9);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.35s ease, box-shadow 0.35s ease;
+    animation: aparecer 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Al pasar el mouse: la tarjeta sube y se ilumina el borde dorado */
+[class*="st-key-tarjeta"]:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201, 164, 92, 0.45) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                0 26px 50px -24px rgba(0, 0, 0, 0.95),
+                0 0 0 1px rgba(201, 164, 92, 0.12);
+}
+
+/* Línea dorada que aparece en el borde superior al pasar el mouse */
+[class*="st-key-tarjeta"]::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #E3C27E, transparent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+[class*="st-key-tarjeta"]:hover::before {
+    opacity: 1;
+}
+
+/* Las tarjetas de la 2.ª, 3.ª y 4.ª columna aparecen un poquito después (efecto cascada) */
+[data-testid="stColumn"]:nth-child(2) [class*="st-key-tarjeta"] { animation-delay: 0.08s; }
+[data-testid="stColumn"]:nth-child(3) [class*="st-key-tarjeta"] { animation-delay: 0.16s; }
+[data-testid="stColumn"]:nth-child(4) [class*="st-key-tarjeta"] { animation-delay: 0.24s; }
+
+/* Tarjetas grandes (gráficas, controles): se iluminan pero no se mueven */
+[class*="st-key-tarjeta_fija"]:hover {
+    transform: none;
+}
+
+/* ===================================================================
+   4. Indicadores (st.metric con borde)
+   =================================================================== */
+[data-testid="stMetric"] {
+    background: linear-gradient(180deg, #14161C 0%, #0F1115 100%);
+    border-color: #23262E !important;
+    transition: border-color 0.35s ease;
+    animation: aparecer 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+[data-testid="stMetric"]:hover {
+    border-color: rgba(201, 164, 92, 0.4) !important;
+}
+[data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] { animation-delay: 0.08s; }
+[data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] { animation-delay: 0.16s; }
+[data-testid="stColumn"]:nth-child(4) [data-testid="stMetric"] { animation-delay: 0.24s; }
+
+/* Título del indicador: pequeño, en mayúsculas y gris */
+[data-testid="stMetricLabel"] p {
+    color: #8B909C;
+    font-size: 0.72rem !important;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: normal !important;
+}
+[data-testid="stMetricLabel"] .stMarkdownEllipsis {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+}
+
+/* Valor del indicador */
+[data-testid="stMetricValue"] {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #F4F1EA;
+}
+
+/* Dentro de las tarjetas de empresa, el título del dato principal va normal */
+[class*="st-key-tarjeta_empresa"] [data-testid="stMetricLabel"] p {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.85rem !important;
+    font-weight: 500;
+}
+[class*="st-key-tarjeta_empresa"] [data-testid="stMetric"] {
+    background: transparent;
+}
+/* El monto de hoy es el dato principal de la tarjeta: grande */
+[class*="st-key-tarjeta_empresa"] [data-testid="stMetricValue"] [data-testid="stMarkdownContainer"] p {
+    font-size: 2.2rem;
+    color: #F4F1EA;
+    line-height: 1.15;
+}
+
+/* En la fila de "Las 10 empresas" los valores son nombres: letra serif */
+.st-key-indicadores_empresas [data-testid="stMetricValue"] {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 1.65rem;
+}
+.st-key-indicadores_empresas [data-testid="stMetricValue"] * {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.2;
+}
+
+/* ===================================================================
+   5. Botones
+   =================================================================== */
+button[data-testid^="stBaseButton"] {
+    transition: transform 0.25s ease, box-shadow 0.25s ease,
+                border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+button[data-testid^="stBaseButton"] [data-testid="stIconMaterial"] {
+    transition: transform 0.25s ease;
+}
+
+/* Botón principal: dorado con texto negro y un destello que lo cruza */
+button[data-testid="stBaseButton-primary"] {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #E6C886 0%, #C9A45C 50%, #A9853F 100%);
+    border: none;
+    color: #0A0B0E;
+    box-shadow: 0 8px 24px -10px rgba(201, 164, 92, 0.6);
+}
+button[data-testid="stBaseButton-primary"] p {
+    color: #0A0B0E;
+    font-weight: 600;
+}
+button[data-testid="stBaseButton-primary"]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: skewX(-20deg);
+}
+button[data-testid="stBaseButton-primary"]:hover {
+    transform: translateY(-2px);
+    color: #0A0B0E;
+    box-shadow: 0 14px 30px -10px rgba(201, 164, 92, 0.75);
+}
+button[data-testid="stBaseButton-primary"]:hover::after {
+    animation: destello 0.9s ease;
+}
+button[data-testid="stBaseButton-primary"]:hover [data-testid="stIconMaterial"] {
+    transform: translateX(4px);
+}
+button[data-testid="stBaseButton-primary"]:disabled {
+    background: #1A1D23;
+    color: #5D6270;
+    box-shadow: none;
+}
+button[data-testid="stBaseButton-primary"]:disabled p {
+    color: #5D6270;
+}
+
+/* Botón normal: contorno fino que se vuelve dorado */
+button[data-testid="stBaseButton-secondary"] {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #2A2E37;
+}
+button[data-testid="stBaseButton-secondary"]:hover {
+    transform: translateY(-2px);
+    border-color: #C9A45C;
+    color: #E3C27E;
+    background: rgba(201, 164, 92, 0.06);
+}
+
+/* Botón de texto (los "Ir a …" de las tarjetas): dorado, la flecha avanza */
+button[data-testid="stBaseButton-tertiary"] {
+    color: #D9B872;
+}
+button[data-testid="stBaseButton-tertiary"] p {
+    font-weight: 600;
+}
+button[data-testid="stBaseButton-tertiary"]:hover {
+    color: #F0D69B;
+}
+button[data-testid="stBaseButton-tertiary"]:hover [data-testid="stIconMaterial"] {
+    transform: translateX(5px);
+}
+
+/* Pestañas: la que está encima se ilumina en dorado */
+button[data-baseweb="tab"] p {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+button[data-baseweb="tab"]:hover p {
+    color: #E3C27E;
+}
+
+/* ===================================================================
+   6. Portada (Inicio)
+   =================================================================== */
+.portada {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.4rem;
+    padding: 3.4rem 3.2rem 3rem 3.2rem;
+    background: linear-gradient(160deg, #121418 0%, #0B0C10 60%, #0E0F13 100%);
+    border: 1px solid #23262E;
+    animation: aparecer 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+/* Dos manchas de luz borrosas que flotan detrás del texto */
+.portada .luz {
+    position: absolute;
+    border-radius: 50%;
+    animation: flotar 14s ease-in-out infinite;
+}
+.portada .luz.dorada {
+    width: 640px;
+    height: 640px;
+    right: -220px;
+    top: -320px;
+    background: radial-gradient(circle, rgba(201, 164, 92, 0.30) 0%, rgba(201, 164, 92, 0) 65%);
+}
+.portada .luz.azul {
+    width: 560px;
+    height: 560px;
+    right: 180px;
+    bottom: -360px;
+    background: radial-gradient(circle, rgba(63, 127, 219, 0.22) 0%, rgba(63, 127, 219, 0) 65%);
+    animation-delay: -7s;
+}
+/* Rejilla fina de fondo, como el papel de un gráfico financiero */
+.portada .rejilla {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(90deg, transparent 0%, black 55%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 55%);
+}
+.portada .contenido {
+    position: relative;
+}
+.portada .etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #C9CCD3;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid #2A2E37;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+}
+.portada .titulo {
+    font-family: "Fraunces", serif;
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: #F4F1EA;
+    margin: 1.4rem 0 1.1rem 0;
+    max-width: 780px;
+}
+/* La palabra destacada del título va en cursiva dorada */
+.portada .titulo em {
+    font-style: italic;
+    padding-right: 0.12em;   /* para que la cursiva no se corte al final */
+    background: linear-gradient(90deg, #F0D69B, #C9A45C);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.portada .texto {
+    color: #A7ACB7;
+    font-size: 1.2rem;
+    font-weight: 300;
+    max-width: 600px;
+    line-height: 1.55;
+}
+
+/* Punto verde que late ("datos reales") */
+.vivo {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3DD68C;
+    animation: latir 2s infinite;
+}
+
+/* Cinta de cotizaciones */
+.cinta {
+    overflow: hidden;
+    border-top: 1px solid #1C1F25;
+    border-bottom: 1px solid #1C1F25;
+    padding: 0.85rem 0;
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.cinta .pista {
+    display: inline-flex;
+    gap: 3rem;
+    padding-right: 3rem;
+    white-space: nowrap;
+    animation: desplazar 45s linear infinite;
+}
+.cinta:hover .pista {
+    animation-play-state: paused;   /* se detiene al pasar el mouse */
+}
+.cinta .item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 0.92rem;
+}
+.cinta .sigla {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    color: #E8E6E1;
+}
+.cinta .nombre {
+    color: #8B909C;
+}
+.sube { color: #3DD68C; }
+.baja { color: #F06A6A; }
+
+/* ===================================================================
+   7. Encabezado de cada sección: indicador de pasos
+   =================================================================== */
+.pasos {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.8rem;
+    flex-wrap: wrap;
+    animation: aparecer 0.5s ease both;
+}
+.pasos .item {
+    flex: 1;
+    min-width: 150px;
+    padding-top: 0.7rem;
+    border-top: 2px solid #23262E;
+    color: #5D6270;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.pasos .item .num {
+    font-family: "JetBrains Mono", monospace;
+    margin-right: 0.4rem;
+}
+.pasos .item.hecho {
+    border-top-color: rgba(201, 164, 92, 0.45);
+    color: #8B909C;
+}
+.pasos .item.actual {
+    border-top-color: #C9A45C;
+    color: #E3C27E;
+    font-weight: 600;
+}
+.st-key-subtitulo p {
+    color: #A7ACB7;
+    font-size: 1.15rem;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 820px;
+}
+
+/* Círculo con número (pasos dentro de tarjetas) */
+.numero {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 164, 92, 0.5);
+    background: rgba(201, 164, 92, 0.08);
+    color: #E3C27E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fraunces", serif;
+    font-size: 1.15rem;
+}
+
+/* ===================================================================
+   8. Tarjeta de empresa
+   =================================================================== */
+.empresa {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+.empresa .logo {
+    min-width: 3.1rem;
+    height: 3.1rem;
+    border-radius: 0.85rem;
+    background: linear-gradient(145deg, #1D2027, #121419);
+    border: 1px solid #2A2E37;
+    color: #E3C27E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.empresa .nombre {
+    font-family: "Fraunces", serif;
+    font-size: 1.3rem;
+    line-height: 1.15;
+    color: #F4F1EA;
+}
+.empresa .descripcion {
+    color: #8B909C;
+    font-size: 0.82rem;
+}
+[class*="st-key-tarjeta_empresa"] [data-testid="stMarkdownContainer"] p {
+    font-size: 0.92rem;
+    color: #C9CCD3;
+}
+
+/* ===================================================================
+   9. Barra lateral
+   =================================================================== */
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-bottom: 0.6rem;
+}
+.marca .nombre {
+    color: #F4F1EA;
+    font-family: "Fraunces", serif;
+    font-size: 1.2rem;
+    line-height: 1.1;
+}
+.marca .curso {
+    color: #6B7080;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+.menu-titulo {
+    color: #5D6270;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-top: 0.8rem;
+}
+
+/* Enlaces del menú: se deslizan un poco y se iluminan en dorado */
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"] {
+    border-left: 2px solid transparent;
+    border-radius: 0 0.6rem 0.6rem 0;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"]:hover {
+    background: rgba(201, 164, 92, 0.07);
+    border-left-color: rgba(201, 164, 92, 0.4);
+}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"][aria-current="page"] {
+    background: linear-gradient(90deg, rgba(201, 164, 92, 0.14), rgba(201, 164, 92, 0.02));
+    border-left-color: #C9A45C;
+}
+[data-testid="stSidebar"] a[data-testid="stPageLink-NavLink"][aria-current="page"] span {
+    color: #F0D69B;
+}
+
+/* ===================================================================
+   10. Pie de página
+   =================================================================== */
+.pie {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-top: 1px solid #1C1F25;
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    color: #6B7080;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+.pie b {
+    color: #A7ACB7;
+    font-weight: 500;
+}
+
+/* ===================================================================
+   11. Pantallas pequeñas (celular)
+   =================================================================== */
+@media (max-width: 700px) {
+    .portada { padding: 2.2rem 1.5rem; }
+    .portada .titulo { font-size: 2.5rem; }
+    h1 { font-size: 2.2rem !important; }
+}
+
+/* ===================================================================
+   12. Avisos
+   =================================================================== */
+/* Avisos informativos: fondo dorado muy suave en vez de azul */
+.stAlertContainer:has([data-testid="stAlertContentInfo"]) {
+    background: rgba(201, 164, 92, 0.06);
+    border: 1px solid rgba(201, 164, 92, 0.22);
+}
+[data-testid="stAlertContentInfo"] p,
+[data-testid="stAlertContentInfo"] {
+    color: #D8D2C4;
+}
+[data-testid="stAlertContentInfo"] [data-testid="stAlertDynamicIcon"] {
+    color: #C9A45C;
+}
+/* Los demás avisos (éxito, advertencia, error) con borde fino de su color */
+.stAlertContainer:has([data-testid="stAlertContentSuccess"]) {
+    background: rgba(61, 214, 140, 0.06);
+    border: 1px solid rgba(61, 214, 140, 0.22);
+}
+.stAlertContainer:has([data-testid="stAlertContentWarning"]) {
+    border: 1px solid rgba(250, 178, 25, 0.25);
+}
+.stAlertContainer:has([data-testid="stAlertContentError"]) {
+    border: 1px solid rgba(240, 106, 106, 0.3);
+}
+
+/* Expansores ("Ver detalle", "Glosario"): borde fino que se ilumina */
+[data-testid="stExpander"] details {
+    border-color: #23262E;
+    transition: border-color 0.3s ease;
+}
+[data-testid="stExpander"] details:hover {
+    border-color: rgba(201, 164, 92, 0.4);
+}
+
+/* ===================================================================
+   13. Ventana emergente (ficha de la empresa)
+   =================================================================== */
+[data-testid="stDialog"] [role="dialog"] {
+    background: linear-gradient(180deg, #15171D 0%, #0E1014 100%);
+    border: 1px solid rgba(201, 164, 92, 0.3);
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9);
+}
+/* Dentro de la ventana los indicadores no necesitan animarse otra vez */
+[data-testid="stDialog"] [data-testid="stMetric"] {
+    animation: none;
+}
